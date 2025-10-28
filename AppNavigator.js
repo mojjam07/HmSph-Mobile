@@ -21,6 +21,7 @@ import ContactScreen from './src/screens/ContactScreen';
 import PropertiesScreen from './src/screens/PropertiesScreen';
 import AgentsScreen from './src/screens/AgentsScreen';
 import ReviewsScreen from './src/screens/ReviewsScreen';
+import AgentReviewsScreen from './src/screens/AgentReviewsScreen';
 
 // Import dashboard screens
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
@@ -152,6 +153,11 @@ function MainStack() {
       <Stack.Screen
         name="AgentDashboard"
         component={AgentDashboardScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AgentReviews"
+        component={AgentReviewsScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

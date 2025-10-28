@@ -382,10 +382,10 @@ const AdminDashboardScreen = () => {
                 </TouchableOpacity>
                 {agent.verificationStatus === 'PENDING' && (
                   <>
-                    <TouchableOpacity key={`approve-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleApproveAgent(agent.id)}>
+                    <TouchableOpacity key={`approve-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleApproveAgent(agent.agentId || agent.id)}>
                       <CheckCircle size={16} color="#10b981" />
                     </TouchableOpacity>
-                    <TouchableOpacity key={`reject-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleRejectAgent(agent.id)}>
+                    <TouchableOpacity key={`reject-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleRejectAgent(agent.agentId || agent.id)}>
                       <XCircle size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </>
@@ -486,7 +486,7 @@ const AdminDashboardScreen = () => {
               <View style={styles.reviewHeader}>
                 <View style={styles.reviewUser}>
                   <Text style={styles.reviewUserName}>
-                    {review.User?.name || review.userName || 'Anonymous'}
+                    {review.User ? `${review.User.firstName} ${review.User.lastName}` : (review.userName || 'Anonymous')}
                   </Text>
                   <View style={styles.reviewRating}>
                     {[...Array(5)].map((_, i) => (

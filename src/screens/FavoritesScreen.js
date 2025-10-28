@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import ApiService from '../api/ApiService';
@@ -57,29 +58,33 @@ export default function FavoritesScreen() {
 
   if (!user) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.title}>My Favorites</Text>
-        <Text style={styles.message}>Please login to view your favorite properties</Text>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('RoleSelection')}
-        >
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <Text style={styles.title}>My Favorites</Text>
+          <Text style={styles.message}>Please login to view your favorite properties</Text>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate('RoleSelection')}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#007bff" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Favorites</Text>
         <Text style={styles.subtitle}>
@@ -119,7 +124,7 @@ export default function FavoritesScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

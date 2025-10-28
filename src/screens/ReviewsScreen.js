@@ -15,11 +15,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Star, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Search, CheckCircle, Shield, Users, Award, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react-native';
 import ApiService from '../api/ApiService';
+import ReviewModal from '../components/ReviewModal';
 
-export default function ReviewsScreen() {
+export default function ReviewsScreen({ route }) {
   const navigation = useNavigation();
+  const { agentView } = route?.params || {};
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [properties, setProperties] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +30,7 @@ export default function ReviewsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [agentProfile, setAgentProfile] = useState(null);
 
   // Calculate review statistics
   const reviewStats = {
@@ -44,8 +48,13 @@ export default function ReviewsScreen() {
   };
 
   useEffect(() => {
-    fetchReviews();
-  }, [filter]);
+    if (agentView) {
+      fetchAgentReviews();
+    } else {
+      fetchReviews();
+      fetchProperties();
+    }
+  }, [filter, agentView]);
 
   const fetchReviews = async () => {
     try {
@@ -114,14 +123,47 @@ export default function ReviewsScreen() {
     }
   };
 
+  const fetchProperties = async () => {
+    try {
+      const data = await ApiService.getProperties();
+      setProperties(data || []);
+    } catch (err) {
+      console.error('Error fetching properties:', err);
+    }
+  };
+
   const handleWriteReview = (property) => {
     setSelectedProperty(property);
     setShowReviewModal(true);
   };
 
+  const fetchAgentReviews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get agent profile first
+      const profile = await ApiService.getAgentProfile();
+      setAgentProfile(profile);
+
+      // Fetch reviews for this agent's properties
+      const agentReviews = await ApiService.getAgentReviews(profile.id);
+      setReviews(agentReviews || []);
+    } catch (err) {
+      console.error('Error fetching agent reviews:', err);
+      setError('Failed to load your reviews. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleReviewSubmitted = () => {
     setShowReviewModal(false);
-    fetchReviews(); // Refresh reviews after submission
+    if (agentView) {
+      fetchAgentReviews();
+    } else {
+      fetchReviews();
+    }
   };
 
   const getFilteredReviews = () => {
@@ -192,7 +234,7 @@ export default function ReviewsScreen() {
           </View>
           <View>
             <Text style={styles.userName}>
-              {review.User?.name || review.userName || 'Anonymous User'}
+              {review.User ? `${review.User.firstName} ${review.User.lastName}` : (review.userName || 'Anonymous User')}
             </Text>
             <View style={styles.ratingContainer}>
               <View style={styles.starsContainer}>
@@ -293,61 +335,82 @@ export default function ReviewsScreen() {
         >
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Reviews from Our People</Text>
+        <Text style={styles.headerTitle}>
+          {agentView ? 'My Reviews' : 'Reviews from Our People'}
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/* Hero Section */}
-      <View style={styles.heroSection}>
-        <Text style={styles.heroTitle}>Reviews from Our People</Text>
-        <Text style={styles.heroSubtitle}>
-          Discover what our community says about their experiences
-        </Text>
+      {!agentView && (
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>Reviews from Our People</Text>
+          <Text style={styles.heroSubtitle}>
+            Discover what our community says about their experiences
+          </Text>
 
-        <View style={styles.searchContainer}>
-          <Search size={20} color="#6b7280" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search reviews..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+          <View style={styles.searchContainer}>
+            <Search size={20} color="#6b7280" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search reviews..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
         </View>
-      </View>
+      )}
 
-      {/* Stats Section */}
-      <View style={styles.statsSection}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{reviewStats.averageRating}</Text>
-          <View style={styles.starsContainer}>
-            {[1,2,3,4,5].map(s => (
-              <Star
-                key={s}
-                size={20}
-                color={s <= Math.round(reviewStats.averageRating) ? '#fbbf24' : '#d1d5db'}
-                fill={s <= Math.round(reviewStats.averageRating) ? '#fbbf24' : 'transparent'}
-              />
+      {/* Agent Reviews Header */}
+      {agentView && agentProfile && (
+        <View style={styles.agentHeader}>
+          <Text style={styles.agentTitle}>Reviews for Your Properties</Text>
+          <Text style={styles.agentSubtitle}>
+            See what clients are saying about your listings
+          </Text>
+          <View style={styles.agentStats}>
+            <Text style={styles.agentStatsText}>
+              {reviews.length} review{reviews.length !== 1 ? 's' : ''} • Average: {reviewStats.averageRating} ★
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Stats Section - Only show for general reviews */}
+      {!agentView && (
+        <View style={styles.statsSection}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{reviewStats.averageRating}</Text>
+            <View style={styles.starsContainer}>
+              {[1,2,3,4,5].map(s => (
+                <Star
+                  key={s}
+                  size={20}
+                  color={s <= Math.round(reviewStats.averageRating) ? '#fbbf24' : '#d1d5db'}
+                  fill={s <= Math.round(reviewStats.averageRating) ? '#fbbf24' : 'transparent'}
+                />
+              ))}
+            </View>
+            <Text style={styles.statLabel}>Based on {reviewStats.totalReviews} reviews</Text>
+          </View>
+
+          <View style={styles.ratingDistribution}>
+            {[5,4,3,2,1].map(rating => (
+              <View key={rating} style={styles.ratingBar}>
+                <Text style={styles.ratingNumber}>{rating}</Text>
+                <View style={styles.progressBar}>
+                  <View
+                    style={[styles.progressFill, { width: `${getRatingPercentage(rating)}%` }]}
+                  />
+                </View>
+                <Text style={styles.ratingCount}>
+                  {reviewStats.ratingDistribution[rating]}
+                </Text>
+              </View>
             ))}
           </View>
-          <Text style={styles.statLabel}>Based on {reviewStats.totalReviews} reviews</Text>
         </View>
-
-        <View style={styles.ratingDistribution}>
-          {[5,4,3,2,1].map(rating => (
-            <View key={rating} style={styles.ratingBar}>
-              <Text style={styles.ratingNumber}>{rating}</Text>
-              <View style={styles.progressBar}>
-                <View
-                  style={[styles.progressFill, { width: `${getRatingPercentage(rating)}%` }]}
-                />
-              </View>
-              <Text style={styles.ratingCount}>
-                {reviewStats.ratingDistribution[rating]}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
+      )}
 
       {/* Filters Section */}
       <View style={styles.filtersSection}>
@@ -402,12 +465,54 @@ export default function ReviewsScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.writeReviewButton}
-          onPress={() => handleWriteReview(null)}
+        {!agentView && (
+          <TouchableOpacity
+            style={styles.writeReviewButton}
+            onPress={() => handleWriteReview(null)}
+          >
+            <Text style={styles.writeReviewText}>Write a Review</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Property Selection Modal for Review */}
+        <Modal
+          visible={showReviewModal}
+          animationType="slide"
+          onRequestClose={() => setShowReviewModal(false)}
+          transparent={true}
         >
-          <Text style={styles.writeReviewText}>Write a Review</Text>
-        </TouchableOpacity>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity onPress={() => setShowReviewModal(false)}>
+                  <ArrowLeft size={24} color="#333" />
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>Select Property to Review</Text>
+                <View style={{ width: 24 }} />
+              </View>
+              <ScrollView style={styles.modalContent}>
+                <Text style={styles.modalSubtitle}>Choose a property you'd like to review:</Text>
+                {properties.length > 0 ? (
+                  properties.map((property) => (
+                    <TouchableOpacity
+                      key={property.id}
+                      style={styles.propertyOption}
+                      onPress={() => {
+                        setSelectedProperty(property);
+                        setShowReviewModal(false);
+                      }}
+                    >
+                      <Text style={styles.propertyOptionTitle}>{property.title}</Text>
+                      <Text style={styles.propertyOptionAddress}>{property.address}</Text>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text style={styles.noPropertiesText}>No properties available to review</Text>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </View>
 
       {/* Reviews List */}
@@ -420,7 +525,7 @@ export default function ReviewsScreen() {
               </View>
               <View>
                 <Text style={styles.userName}>
-                  {review.User?.name || review.userName || 'Anonymous User'}
+                  {review.User ? `${review.User.firstName} ${review.User.lastName}` : (review.userName || 'Anonymous User')}
                 </Text>
                 <View style={styles.ratingContainer}>
                   <View style={styles.starsContainer}>
@@ -469,48 +574,51 @@ export default function ReviewsScreen() {
       {filteredReviews.length === 0 && (
         <View style={styles.emptyContainer}>
           <MessageSquare size={48} color="#9ca3af" />
-          <Text style={styles.emptyTitle}>No reviews found</Text>
-          <Text style={styles.emptyMessage}>
-            {searchQuery ? 'Try adjusting your search terms' :
-             filter === 'all' ? 'Be the first to write a review!' :
-             `No ${filter} reviews found. Try a different filter.`}
+          <Text style={styles.emptyTitle}>
+            {agentView ? 'No reviews yet' : 'No reviews found'}
           </Text>
-          <TouchableOpacity
-            style={styles.writeReviewButton}
-            onPress={() => handleWriteReview(null)}
-          >
-            <Text style={styles.writeReviewText}>Write a Review</Text>
-          </TouchableOpacity>
+          <Text style={styles.emptyMessage}>
+            {agentView
+              ? 'Reviews will appear here once clients leave feedback on your properties'
+              : searchQuery
+                ? 'Try adjusting your search terms'
+                : filter === 'all'
+                  ? 'Be the first to write a review!'
+                  : `No ${filter} reviews found. Try a different filter.`
+            }
+          </Text>
+          {!agentView && (
+            <TouchableOpacity
+              style={styles.writeReviewButton}
+              onPress={() => handleWriteReview(null)}
+            >
+              <Text style={styles.writeReviewText}>Write a Review</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
-      {/* Review Modal Placeholder */}
-      <Modal
-        visible={showReviewModal}
-        animationType="slide"
-        onRequestClose={() => setShowReviewModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowReviewModal(false)}>
-              <ArrowLeft size={24} color="#333" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Write a Review</Text>
-            <View style={{ width: 24 }} />
-          </View>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalMessage}>
-              Review modal functionality will be implemented with the ReviewModal component.
-            </Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => setShowReviewModal(false)}
-            >
-              <Text style={styles.modalButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* Review Modal */}
+      {selectedProperty && (
+        <ReviewModal
+          isVisible={!!selectedProperty}
+          onClose={() => {
+            setSelectedProperty(null);
+            setShowReviewModal(false);
+          }}
+          propertyId={selectedProperty?.id}
+          propertyTitle={selectedProperty?.title}
+          onReviewSubmitted={() => {
+            setSelectedProperty(null);
+            setShowReviewModal(false);
+            if (agentView) {
+              fetchAgentReviews();
+            } else {
+              fetchReviews();
+            }
+          }}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -600,6 +708,35 @@ const styles = StyleSheet.create({
     color: '#cbd5e1',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  agentHeader: {
+    backgroundColor: '#1e293b',
+    padding: 24,
+    alignItems: 'center',
+  },
+  agentTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  agentSubtitle: {
+    fontSize: 16,
+    color: '#cbd5e1',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  agentStats: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  agentStatsText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -882,16 +1019,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
     backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+    minHeight: '50%',
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    paddingTop: 50,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -901,26 +1045,35 @@ const styles = StyleSheet.create({
     color: '#1f2937',
   },
   modalContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
+    padding: 20,
   },
-  modalMessage: {
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginBottom: 20,
+  },
+  propertyOption: {
+    backgroundColor: '#f9fafb',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  propertyOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  propertyOptionAddress: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  noPropertiesText: {
     fontSize: 16,
     color: '#6b7280',
     textAlign: 'center',
-    marginBottom: 24,
-  },
-  modalButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    padding: 40,
   },
 });

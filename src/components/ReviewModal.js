@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,10 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
-  ScrollView
+  ScrollView,
+  FlatList
 } from 'react-native';
-import { Star, X, Send } from 'lucide-react-native';
+import { Star, X, Send, Search } from 'lucide-react-native';
 import ApiService from '../api/ApiService';
 
 export default function ReviewModal({ isVisible, onClose, propertyId, propertyTitle, onReviewSubmitted }) {
@@ -18,6 +19,42 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [properties, setProperties] = useState([]);
+  const [agents, setAgents] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState(propertyId ? { id: propertyId, title: propertyTitle } : null);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
+  const [showAgentDropdown, setShowAgentDropdown] = useState(false);
+  const [reviewType, setReviewType] = useState('property'); // 'property' or 'agent'
+
+  useEffect(() => {
+    if (isVisible) {
+      if (!propertyId && reviewType === 'property') {
+        fetchProperties();
+      } else if (reviewType === 'agent') {
+        fetchAgents();
+      }
+    }
+  }, [isVisible, propertyId, reviewType]);
+
+  const fetchProperties = async () => {
+    try {
+      const data = await ApiService.getProperties();
+      setProperties(data || []);
+    } catch (err) {
+      console.error('Error fetching properties:', err);
+    }
+  };
+
+  const fetchAgents = async () => {
+    try {
+      const data = await ApiService.getAgents();
+      setAgents(data || []);
+    } catch (err) {
+      console.error('Error fetching agents:', err);
+    }
+  };
 
   const handleRatingPress = (selectedRating) => {
     setRating(selectedRating);
@@ -29,12 +66,12 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
       setError('Please select a rating');
       return false;
     }
-    if (!comment.trim()) {
-      setError('Please write a review comment');
+    if (comment.trim().length < 10) {
+      setError('Please write at least 10 characters');
       return false;
     }
-    if (comment.trim().length < 10) {
-      setError('Review comment must be at least 10 characters long');
+    if (!selectedProperty && !selectedAgent) {
+      setError('Please select a property or agent to review');
       return false;
     }
     return true;
@@ -49,26 +86,29 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
     setError('');
 
     try {
-      const reviewData = {
+      const reviewPayload = {
         rating,
-        comment: comment.trim(),
-        propertyId: propertyId || null
+        comment: comment.trim()
       };
+      if (selectedProperty) {
+        reviewPayload.propertyId = selectedProperty.id;
+      }
+      if (selectedAgent) {
+        reviewPayload.agentId = selectedAgent.id;
+      }
 
-      await ApiService.submitReview(reviewData);
+      await ApiService.createReview(reviewPayload);
 
       // Reset form
       setRating(0);
       setComment('');
-      setError('');
-
-      // Close modal and notify parent
+      setSelectedProperty(null);
+      setSelectedAgent(null);
+      setSearchQuery('');
+      onReviewSubmitted();
       onClose();
-      if (onReviewSubmitted) {
-        onReviewSubmitted();
-      }
 
-      Alert.alert('Success', 'Your review has been submitted successfully!');
+      Alert.alert('Success', 'Your review has been submitted and is pending approval. Thank you!');
     } catch (err) {
       console.error('Error submitting review:', err);
       setError(err.message || 'Failed to submit review. Please try again.');
@@ -82,7 +122,19 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
       setRating(0);
       setComment('');
       setError('');
+      setSelectedProperty(null);
+      setSelectedAgent(null);
+      setSearchQuery('');
       onClose();
+    }
+  };
+
+  const handleModalClick = (e) => {
+    if (showPropertyDropdown && !e.target.closest('.property-dropdown')) {
+      setShowPropertyDropdown(false);
+    }
+    if (showAgentDropdown && !e.target.closest('.agent-dropdown')) {
+      setShowAgentDropdown(false);
     }
   };
 
@@ -110,7 +162,7 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
       onRequestClose={handleClose}
       transparent={true}
     >
-      <View style={styles.overlay}>
+      <View style={styles.overlay} onTouchStart={handleModalClick}>
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
@@ -125,12 +177,149 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
           </View>
 
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Property Info */}
-            {propertyTitle && (
-              <View style={styles.propertyInfo}>
-                <Text style={styles.propertyLabel}>Reviewing:</Text>
-                <Text style={styles.propertyTitle}>{propertyTitle}</Text>
-              </View>
+            {/* Property/Agent Selection */}
+            {selectedProperty ? (
+              <>
+                <View style={styles.propertyInfo}>
+                  <Text style={styles.propertyLabel}>Reviewing Property:</Text>
+                  <Text style={styles.propertyTitle}>{selectedProperty.title}</Text>
+                  <TouchableOpacity
+                    onPress={() => setSelectedProperty(null)}
+                    style={styles.changeButton}
+                  >
+                    <Text style={styles.changeButtonText}>Change property</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : selectedAgent ? (
+              <>
+                <View style={styles.propertyInfo}>
+                  <Text style={styles.propertyLabel}>Reviewing Agent:</Text>
+                  <Text style={styles.propertyTitle}>{selectedAgent.name || selectedAgent.businessName}</Text>
+                  <TouchableOpacity
+                    onPress={() => setSelectedAgent(null)}
+                    style={styles.changeButton}
+                  >
+                    <Text style={styles.changeButtonText}>Change agent</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.propertyInfo}>
+                  <Text style={styles.propertyLabel}>Select Property to Review</Text>
+                  <Text style={styles.propertyTitle}>Choose the property you want to review</Text>
+
+                  <View style={styles.reviewTypeContainer}>
+                    <TouchableOpacity
+                      style={[styles.reviewTypeButton, reviewType === 'property' && styles.reviewTypeButtonActive]}
+                      onPress={() => setReviewType('property')}
+                    >
+                      <Text style={[styles.reviewTypeText, reviewType === 'property' && styles.reviewTypeTextActive]}>Property</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.reviewTypeButton, reviewType === 'agent' && styles.reviewTypeButtonActive]}
+                      onPress={() => setReviewType('agent')}
+                    >
+                      <Text style={[styles.reviewTypeText, reviewType === 'agent' && styles.reviewTypeTextActive]}>Agent</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {reviewType === 'property' ? (
+                    <View style={styles.searchContainer}>
+                      <View style={styles.searchInputContainer}>
+                        <Search size={20} color="#6b7280" style={styles.searchIcon} />
+                        <TextInput
+                          style={styles.searchInput}
+                          placeholder="Search properties..."
+                          value={searchQuery}
+                          onChangeText={(text) => {
+                            setSearchQuery(text);
+                            setShowPropertyDropdown(true);
+                          }}
+                          onFocus={() => setShowPropertyDropdown(true)}
+                        />
+                      </View>
+
+                      {showPropertyDropdown && (
+                        <View style={styles.dropdown}>
+                          {properties
+                            .filter(property =>
+                              property.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              property.address?.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((property) => (
+                              <TouchableOpacity
+                                key={property.id}
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                  setSelectedProperty(property);
+                                  setShowPropertyDropdown(false);
+                                  setSearchQuery('');
+                                }}
+                              >
+                                <Text style={styles.dropdownItemTitle}>{property.title}</Text>
+                                <Text style={styles.dropdownItemAddress}>{property.address}</Text>
+                              </TouchableOpacity>
+                            ))}
+                          {properties.filter(property =>
+                            property.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            property.address?.toLowerCase().includes(searchQuery.toLowerCase())
+                          ).length === 0 && (
+                            <Text style={styles.noResultsText}>No properties found</Text>
+                          )}
+                        </View>
+                      )}
+                    </View>
+                  ) : (
+                    <View style={styles.searchContainer}>
+                      <View style={styles.searchInputContainer}>
+                        <Search size={20} color="#6b7280" style={styles.searchIcon} />
+                        <TextInput
+                          style={styles.searchInput}
+                          placeholder="Search agents..."
+                          value={searchQuery}
+                          onChangeText={(text) => {
+                            setSearchQuery(text);
+                            setShowAgentDropdown(true);
+                          }}
+                          onFocus={() => setShowAgentDropdown(true)}
+                        />
+                      </View>
+
+                      {showAgentDropdown && (
+                        <View style={styles.dropdown}>
+                          {agents
+                            .filter(agent =>
+                              agent.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              agent.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((agent) => (
+                              <TouchableOpacity
+                                key={agent.id}
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                  setSelectedAgent(agent);
+                                  setShowAgentDropdown(false);
+                                  setSearchQuery('');
+                                }}
+                              >
+                                <Text style={styles.dropdownItemTitle}>{agent.name || agent.businessName}</Text>
+                                <Text style={styles.dropdownItemAddress}>{agent.phone}</Text>
+                              </TouchableOpacity>
+                            ))}
+                          {agents.filter(agent =>
+                            agent.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            agent.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
+                          ).length === 0 && (
+                            <Text style={styles.noResultsText}>No agents found</Text>
+                          )}
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              </>
             )}
 
             {/* Rating Section */}
@@ -188,6 +377,14 @@ export default function ReviewModal({ isVisible, onClose, propertyId, propertyTi
               <Text style={styles.guidelineText}>• Focus on your experience</Text>
               <Text style={styles.guidelineText}>• Keep it respectful and relevant</Text>
               <Text style={styles.guidelineText}>• Minimum 10 characters required</Text>
+            </View>
+
+            {/* Note */}
+            <View style={styles.noteContainer}>
+              <Text style={styles.noteText}>
+                <Text style={styles.noteBold}>Note:</Text> Your review will be submitted for approval before it appears publicly.
+                This helps maintain quality and authenticity across our platform.
+              </Text>
             </View>
           </ScrollView>
 
@@ -379,5 +576,107 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  changeButton: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  changeButtonText: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  reviewTypeContainer: {
+    flexDirection: 'row',
+    marginTop: 12,
+    gap: 8,
+  },
+  reviewTypeButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  reviewTypeButtonActive: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+  reviewTypeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  reviewTypeTextActive: {
+    color: '#fff',
+  },
+  searchContainer: {
+    marginTop: 12,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1f2937',
+  },
+  dropdown: {
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    marginTop: 4,
+    backgroundColor: '#fff',
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  dropdownItemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  dropdownItemAddress: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  noResultsText: {
+    textAlign: 'center',
+    padding: 16,
+    color: '#6b7280',
+    fontSize: 14,
+  },
+  noteContainer: {
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  noteText: {
+    fontSize: 14,
+    color: '#0369a1',
+    lineHeight: 20,
+  },
+  noteBold: {
+    fontWeight: '600',
   },
 });

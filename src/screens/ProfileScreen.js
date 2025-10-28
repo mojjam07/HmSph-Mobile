@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { User, Settings, LogOut, Heart, Home, Phone, Mail, Shield, Building } from 'lucide-react-native';
@@ -75,15 +76,18 @@ export default function ProfileScreen() {
 
   if (!user) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.message}>Please login to view your profile</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <Text style={styles.title}>Profile</Text>
+          <Text style={styles.message}>Please login to view your profile</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
       {/* Profile Header */}
       <View style={styles.header}>
         <View style={styles.avatar}>
@@ -207,7 +211,8 @@ export default function ProfileScreen() {
           © 2024 HomeSphere. All rights reserved.
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

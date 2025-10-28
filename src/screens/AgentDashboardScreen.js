@@ -121,7 +121,7 @@ const AgentDashboardScreen = () => {
   };
 
   const renderStatCard = (title, value, icon, color) => (
-    <View style={[styles.statCard, { borderLeftColor: color }]}>
+    <View key={title} style={[styles.statCard, { borderLeftColor: color }]}>
       <View style={styles.statIcon}>
         {icon}
       </View>
@@ -130,6 +130,17 @@ const AgentDashboardScreen = () => {
         <Text style={styles.statTitle}>{title}</Text>
       </View>
     </View>
+  );
+
+  const renderActionCard = (key, onPress, icon, text) => (
+    <TouchableOpacity
+      key={key}
+      style={styles.actionCard}
+      onPress={onPress}
+    >
+      {icon}
+      <Text style={styles.actionText}>{text}</Text>
+    </TouchableOpacity>
   );
 
 
@@ -199,41 +210,33 @@ const AgentDashboardScreen = () => {
       <View style={styles.actionsSection}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsGrid}>
-          <TouchableOpacity
-            key="add-property"
-            style={styles.actionCard}
-            onPress={() => navigation.navigate('Properties', { showAgentForm: true })}
-          >
-            <Plus size={24} color="#007bff" />
-            <Text style={styles.actionText}>Add Property</Text>
-          </TouchableOpacity>
+          {renderActionCard(
+            'add-property',
+            () => navigation.navigate('Properties', { showAgentForm: true }),
+            <Plus size={24} color="#007bff" />,
+            'Add Property'
+          )}
 
-          <TouchableOpacity
-            key="view-listings"
-            style={styles.actionCard}
-            onPress={() => navigation.navigate('Properties')}
-          >
-            <Building size={24} color="#10b981" />
-            <Text style={styles.actionText}>View Listings</Text>
-          </TouchableOpacity>
+          {renderActionCard(
+            'view-listings',
+            () => navigation.navigate('Properties', { showAgentProperties: true }),
+            <Building size={24} color="#10b981" />,
+            'View Listings'
+          )}
 
-          <TouchableOpacity
-            key="view-reviews"
-            style={styles.actionCard}
-            onPress={() => navigation.navigate('Reviews')}
-          >
-            <Star size={24} color="#f59e0b" />
-            <Text style={styles.actionText}>View Reviews</Text>
-          </TouchableOpacity>
+          {renderActionCard(
+            'view-reviews',
+            () => navigation.navigate('AgentReviews'),
+            <Star size={24} color="#f59e0b" />,
+            'View Reviews'
+          )}
 
-          <TouchableOpacity
-            key="profile"
-            style={styles.actionCard}
-            onPress={() => navigation.navigate('Profile')}
-          >
-            <Users size={24} color="#8b5cf6" />
-            <Text style={styles.actionText}>Profile</Text>
-          </TouchableOpacity>
+          {renderActionCard(
+            'profile',
+            () => navigation.navigate('Profile'),
+            <Users size={24} color="#8b5cf6" />,
+            'Profile'
+          )}
         </View>
       </View>
 
@@ -248,7 +251,7 @@ const AgentDashboardScreen = () => {
 
         {dashboardData.properties.length > 0 ? (
           dashboardData.properties.slice(0, 3).map((property) => (
-            <View key={property.id} style={styles.itemCard}>
+            <View key={`property-${property.id}`} style={styles.itemCard}>
               <View style={styles.itemHeader}>
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemTitle} numberOfLines={1}>
@@ -277,13 +280,13 @@ const AgentDashboardScreen = () => {
               </View>
 
               <View style={styles.itemActions}>
-                <TouchableOpacity key="edit-property" style={styles.actionButton}>
+                <TouchableOpacity key={`edit-property-${property.id}`} style={styles.actionButton}>
                   <Edit3 size={16} color="#6b7280" />
                 </TouchableOpacity>
-                <TouchableOpacity key="view-property" style={styles.actionButton}>
+                <TouchableOpacity key={`view-property-${property.id}`} style={styles.actionButton}>
                   <Eye size={16} color="#6b7280" />
                 </TouchableOpacity>
-                <TouchableOpacity key="message-property" style={styles.actionButton}>
+                <TouchableOpacity key={`message-property-${property.id}`} style={styles.actionButton}>
                   <MessageSquare size={16} color="#6b7280" />
                 </TouchableOpacity>
               </View>
@@ -310,23 +313,23 @@ const AgentDashboardScreen = () => {
       <View style={[styles.section, { paddingBottom: 40 }]}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Reviews</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Reviews')}>
+          <TouchableOpacity onPress={() => navigation.navigate('AgentReviews')}>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
 
         {dashboardData.reviews.length > 0 ? (
           dashboardData.reviews.slice(0, 3).map((review) => (
-            <View key={review.id} style={styles.reviewCard}>
+            <View key={`review-${review.id}`} style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
                 <View style={styles.reviewUser}>
                   <Text style={styles.reviewUserName}>
-                    {review.User?.name || review.userName || 'Anonymous'}
+                    {review.User ? `${review.User.firstName} ${review.User.lastName}` : (review.userName || 'Anonymous')}
                   </Text>
                   <View style={styles.reviewRating}>
                     {[...Array(5)].map((_, i) => (
                       <Star
-                        key={`star-${i}`}
+                        key={`star-${review.id}-${i}`}
                         size={14}
                         color={i < review.rating ? '#f59e0b' : '#d1d5db'}
                         fill={i < review.rating ? '#f59e0b' : 'transparent'}
@@ -443,6 +446,7 @@ const styles = StyleSheet.create({
   },
   actionsSection: {
     padding: 20,
+    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 18,

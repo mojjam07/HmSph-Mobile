@@ -12,18 +12,22 @@ import {
   RefreshControl
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Filter, MapPin, Bed, Bath, Square, Heart, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react-native';
 import PropertyCard from '../components/PropertyCard';
+import AgentPropertyForm from '../components/AgentPropertyForm';
 import ApiService from '../api/ApiService';
 
-export default function PropertiesScreen() {
+export default function PropertiesScreen({ route }) {
   const navigation = useNavigation();
+  const { showAgentForm, showAgentProperties } = route?.params || {};
   const [showFilters, setShowFilters] = useState(false);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
+  const [showAgentPropertyForm, setShowAgentPropertyForm] = useState(showAgentForm || false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,9 +61,12 @@ export default function PropertiesScreen() {
   ];
 
   useEffect(() => {
+    if (showAgentForm) {
+      setShowAgentPropertyForm(true);
+    }
     fetchProperties();
     fetchFavorites();
-  }, []);
+  }, [showAgentForm, showAgentProperties]);
 
   useEffect(() => {
     // Debounce search
@@ -75,13 +82,27 @@ export default function PropertiesScreen() {
       setLoading(true);
       setError(null);
 
-      const filters = {};
-      if (searchQuery) filters.search = searchQuery;
-      if (selectedPropertyType !== 'all') filters.type = selectedPropertyType;
-      if (priceRange !== 'all') filters.priceRange = priceRange;
-      if (sortBy !== 'newest') filters.sort = sortBy;
+      let data;
+      if (showAgentProperties) {
+        // Fetch agent's own properties
+        const agentProfile = await ApiService.getAgentProfile();
+        if (agentProfile) {
+          data = await ApiService.getAgentProperties(agentProfile.id);
+        } else {
+          setError('Agent profile not found');
+          return;
+        }
+      } else {
+        // Fetch all properties with filters
+        const filters = {};
+        if (searchQuery) filters.search = searchQuery;
+        if (selectedPropertyType !== 'all') filters.type = selectedPropertyType;
+        if (priceRange !== 'all') filters.priceRange = priceRange;
+        if (sortBy !== 'newest') filters.sort = sortBy;
 
-      const data = await ApiService.getProperties(filters);
+        data = await ApiService.getProperties(filters);
+      }
+
       setProperties(data.properties || data || []);
     } catch (err) {
       console.error('Error fetching properties:', err);
@@ -170,17 +191,52 @@ export default function PropertiesScreen() {
     </ScrollView>
   );
 
+  // Show agent property form if requested
+  if (showAgentPropertyForm) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              setShowAgentPropertyForm(false);
+              navigation.goBack();
+            }}
+          >
+            <ArrowLeft size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add New Property</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={styles.agentFormContainer}>
+          <Text style={styles.agentFormTitle}>Create Property Listing</Text>
+          <Text style={styles.agentFormSubtitle}>
+            Fill in the details below to add a new property to your portfolio
+          </Text>
+          <AgentPropertyForm
+            navigation={navigation}
+            onSuccess={() => {
+              setShowAgentPropertyForm(false);
+              // Optionally refresh the properties list
+              fetchProperties();
+            }}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (loading && !refreshing) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
         <Text style={styles.loadingText}>Loading properties...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -189,61 +245,67 @@ export default function PropertiesScreen() {
         >
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Find Your Dream Property</Text>
+        <Text style={styles.headerTitle}>
+          {showAgentProperties ? 'My Properties' : 'Find Your Dream Property'}
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Hero Section */}
-      <View style={styles.heroSection}>
-        <Text style={styles.heroTitle}>Find Your Dream Property</Text>
-        <Text style={styles.heroSubtitle}>Discover premium properties across Nigeria</Text>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Search size={20} color="#6b7280" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search by location, property type..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => setShowFilters(!showFilters)}
-          >
-            <Filter size={20} color="#6b7280" />
-            <Text style={styles.filterButtonText}>Filters</Text>
-          </TouchableOpacity>
+      {/* Hero Section - Only show for general property search */}
+      {!showAgentProperties && (
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>Find Your Dream Property</Text>
+          <Text style={styles.heroSubtitle}>Discover premium properties across Nigeria</Text>
         </View>
+      )}
 
-        {/* Filters */}
-        {showFilters && (
-          <View style={styles.filtersContainer}>
-            <Text style={styles.filtersTitle}>Property Type</Text>
-            {renderFilterOption(propertyTypeOptions, selectedPropertyType, setSelectedPropertyType)}
-
-            <Text style={styles.filtersTitle}>Price Range</Text>
-            {renderFilterOption(priceRangeOptions, priceRange, setPriceRange)}
-
-            <Text style={styles.filtersTitle}>Sort By</Text>
-            {renderFilterOption(sortByOptions, sortBy, setSortBy)}
-
-            <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
-              <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+      {/* Search Bar - Only show for general property search */}
+      {!showAgentProperties && (
+        <View style={styles.searchSection}>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Search size={20} color="#6b7280" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by location, property type..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={20} color="#6b7280" />
+              <Text style={styles.filterButtonText}>Filters</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </View>
+
+          {/* Filters */}
+          {showFilters && (
+            <View style={styles.filtersContainer}>
+              <Text style={styles.filtersTitle}>Property Type</Text>
+              {renderFilterOption(propertyTypeOptions, selectedPropertyType, setSelectedPropertyType)}
+
+              <Text style={styles.filtersTitle}>Price Range</Text>
+              {renderFilterOption(priceRangeOptions, priceRange, setPriceRange)}
+
+              <Text style={styles.filtersTitle}>Sort By</Text>
+              {renderFilterOption(sortByOptions, sortBy, setSortBy)}
+
+              <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
+                <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Results Section */}
       <View style={styles.resultsSection}>
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsCount}>
-            {loading ? 'Loading properties...' : `${properties.length} Properties Found`}
+            {loading ? 'Loading properties...' : `${properties.length} ${showAgentProperties ? 'Properties' : 'Properties Found'}`}
           </Text>
         </View>
 
@@ -288,7 +350,7 @@ export default function PropertiesScreen() {
           />
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -313,7 +375,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    paddingTop: 50,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc',
@@ -496,5 +557,46 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
+  },
+  agentFormContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f8fafc',
+  },
+  agentFormTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 8,
+  },
+  agentFormSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+    marginBottom: 32,
+  },
+  formPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 40,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  placeholderText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 12,
+  },
+  placeholderSubtext: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
