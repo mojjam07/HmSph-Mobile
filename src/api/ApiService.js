@@ -291,6 +291,61 @@ class ApiService {
       throw error.response?.data || error;
     }
   }
+
+  // Admin approval/rejection methods
+  async approveAgent(agentId) {
+    try {
+      const response = await this.client.post(`/api/admin/agents/${agentId}/approve`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async rejectAgent(agentId) {
+    try {
+      const response = await this.client.post(`/api/admin/agents/${agentId}/reject`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async approveProperty(propertyId) {
+    try {
+      const response = await this.client.post(`/api/admin/properties/${propertyId}/approve`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async rejectProperty(propertyId) {
+    try {
+      const response = await this.client.post(`/api/admin/properties/${propertyId}/reject`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async approveReview(reviewId) {
+    try {
+      const response = await this.client.post(`/api/reviews/${reviewId}/approve`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async rejectReview(reviewId) {
+    try {
+      const response = await this.client.post(`/api/reviews/${reviewId}/reject`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
 }
 
 export default new ApiService();

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-export default function RoleSelectionScreen({ navigation }) {
+export default function WelcomeScreen({ navigation }) {
   const handleRoleSelect = (role) => {
     // Navigate to login with selected role
     navigation.navigate('Login', { role });
@@ -12,29 +12,21 @@ export default function RoleSelectionScreen({ navigation }) {
       <Text style={styles.title}>Welcome to HomeSphere</Text>
       <Text style={styles.subtitle}>Choose your role to continue</Text>
 
-      <TouchableOpacity
-        style={styles.roleButton}
-        onPress={() => handleRoleSelect('user')}
-      >
-        <Text style={styles.roleButtonText}>Continue as User</Text>
-        <Text style={styles.roleDescription}>Browse and buy properties</Text>
-      </TouchableOpacity>
-
+      
+      <Image
+          source={{ uri: 'https://picsum.photos/400/400' }}
+          style={styles.bannerImage}
+      />
+    
       <TouchableOpacity
         style={styles.roleButton}
         onPress={() => handleRoleSelect('agent')}
       >
-        <Text style={styles.roleButtonText}>Continue as Agent</Text>
-        <Text style={styles.roleDescription}>List and manage properties</Text>
+        {/* <Text style={styles.roleDescription}>Are you a registered user of HomeSphere?</Text> */}
+        <Text style={styles.roleButtonText}>Continue to Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.roleButton}
-        onPress={() => handleRoleSelect('admin')}
-      >
-        <Text style={styles.roleButtonText}>Continue as Admin</Text>
-        <Text style={styles.roleDescription}>Manage the platform</Text>
-      </TouchableOpacity>
+      
     </View>
   );
 }
@@ -42,6 +34,7 @@ export default function RoleSelectionScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
@@ -72,6 +65,7 @@ const styles = StyleSheet.create({
   },
   roleButtonText: {
     fontSize: 18,
+    textAlign: 'center',
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
@@ -79,5 +73,11 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: 14,
     color: '#666',
+  },
+  bannerImage: {
+    width: '100%',
+    height: 400,
+    borderRadius: 10,
+    marginBottom: 20,
   },
 });

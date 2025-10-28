@@ -13,7 +13,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import PropertyDetailsScreen from './src/screens/PropertyDetailsScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegistrationScreen from './src/screens/RegistrationScreen';
-import RoleSelectionScreen from './src/screens/RoleSelectionScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
 
 // Import new OtherPages screens
 import AboutScreen from './src/screens/AboutScreen';
@@ -39,10 +39,10 @@ function LoadingScreen() {
 
 function AuthStack() {
   return (
-    <Stack.Navigator initialRouteName="RoleSelection">
+    <Stack.Navigator initialRouteName="Welcome">
       <Stack.Screen
-        name="RoleSelection"
-        component={RoleSelectionScreen}
+        name="Welcome"
+        component={WelcomeScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

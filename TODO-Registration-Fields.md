@@ -8,17 +8,17 @@ Enhance the mobile app registration screen to match the frontend's multi-step re
 - Frontend has multi-step process with roles (user/agent) and additional agent fields
 
 ## Required Changes
-- [x] Add role selection (User/Agent)
-- [x] Add agent-specific fields: businessName, registrationNumber, yearsOfExperience, bankName, accountNumber
-- [x] Implement multi-step form or expand single screen
-- [x] Update form validation
-- [x] Update registration API call to include new fields
+- [ ] Add role selection (User/Agent)
+- [ ] Add agent-specific fields: businessName, registrationNumber, yearsOfExperience, bankName, accountNumber
+- [ ] Implement multi-step form or expand single screen
+- [ ] Update form validation
+- [ ] Update registration API call to include new fields
 - [ ] Test registration flow
 
 ## Files to Edit
 - mobile-app/src/screens/RegistrationScreen.js
 
 ## Testing
-- [ ] Test user registration
-- [ ] Test agent registration with all fields
-- [ ] Verify API integration
+- Test user registration
+- Test agent registration with all fields
+- Verify API integration

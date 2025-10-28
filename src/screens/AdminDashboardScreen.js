@@ -100,6 +100,72 @@ const AdminDashboardScreen = () => {
     }
   };
 
+  const handleApproveAgent = async (agentId) => {
+    try {
+      await ApiService.approveAgent(agentId);
+      Alert.alert('Success', 'Agent approved successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error approving agent:', error);
+      Alert.alert('Error', 'Failed to approve agent');
+    }
+  };
+
+  const handleRejectAgent = async (agentId) => {
+    try {
+      await ApiService.rejectAgent(agentId);
+      Alert.alert('Success', 'Agent rejected successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting agent:', error);
+      Alert.alert('Error', 'Failed to reject agent');
+    }
+  };
+
+  const handleApproveProperty = async (propertyId) => {
+    try {
+      await ApiService.approveProperty(propertyId);
+      Alert.alert('Success', 'Property approved successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error approving property:', error);
+      Alert.alert('Error', 'Failed to approve property');
+    }
+  };
+
+  const handleRejectProperty = async (propertyId) => {
+    try {
+      await ApiService.rejectProperty(propertyId);
+      Alert.alert('Success', 'Property rejected successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting property:', error);
+      Alert.alert('Error', 'Failed to reject property');
+    }
+  };
+
+  const handleApproveReview = async (reviewId) => {
+    try {
+      await ApiService.approveReview(reviewId);
+      Alert.alert('Success', 'Review approved successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error approving review:', error);
+      Alert.alert('Error', 'Failed to approve review');
+    }
+  };
+
+  const handleRejectReview = async (reviewId) => {
+    try {
+      await ApiService.rejectReview(reviewId);
+      Alert.alert('Success', 'Review rejected successfully');
+      loadDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting review:', error);
+      Alert.alert('Error', 'Failed to reject review');
+    }
+  };
+
   const renderStatCard = (title, value, icon, color, trend) => (
     <View style={[styles.statCard, { borderLeftColor: color }]}>
       <View style={styles.statIcon}>
@@ -311,15 +377,15 @@ const AdminDashboardScreen = () => {
               </View>
 
               <View style={styles.itemActions}>
-                <TouchableOpacity key="view-agent" style={styles.actionButton}>
+                <TouchableOpacity key={`view-agent-${agent.id}`} style={styles.actionButton}>
                   <Eye size={16} color="#6b7280" />
                 </TouchableOpacity>
                 {agent.verificationStatus === 'PENDING' && (
                   <>
-                    <TouchableOpacity key="approve-agent" style={styles.actionButton}>
+                    <TouchableOpacity key={`approve-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleApproveAgent(agent.id)}>
                       <CheckCircle size={16} color="#10b981" />
                     </TouchableOpacity>
-                    <TouchableOpacity key="reject-agent" style={styles.actionButton}>
+                    <TouchableOpacity key={`reject-agent-${agent.id}`} style={styles.actionButton} onPress={() => handleRejectAgent(agent.id)}>
                       <XCircle size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </>
@@ -378,15 +444,15 @@ const AdminDashboardScreen = () => {
               </View>
 
               <View style={styles.itemActions}>
-                <TouchableOpacity key="view-property" style={styles.actionButton}>
+                <TouchableOpacity key={`view-property-${property.id}`} style={styles.actionButton}>
                   <Eye size={16} color="#6b7280" />
                 </TouchableOpacity>
                 {property.status === 'PENDING' && (
                   <>
-                    <TouchableOpacity key="approve-property" style={styles.actionButton}>
+                    <TouchableOpacity key={`approve-property-${property.id}`} style={styles.actionButton} onPress={() => handleApproveProperty(property.id)}>
                       <CheckCircle size={16} color="#10b981" />
                     </TouchableOpacity>
-                    <TouchableOpacity key="reject-property" style={styles.actionButton}>
+                    <TouchableOpacity key={`reject-property-${property.id}`} style={styles.actionButton} onPress={() => handleRejectProperty(property.id)}>
                       <XCircle size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </>
@@ -447,11 +513,11 @@ const AdminDashboardScreen = () => {
               <View style={styles.reviewActions}>
                 {review.status === 'PENDING' && (
                   <>
-                    <TouchableOpacity key="approve-review" style={styles.reviewActionButton}>
+                    <TouchableOpacity key={`approve-review-${review.id}`} style={styles.reviewActionButton} onPress={() => handleApproveReview(review.id)}>
                       <CheckCircle size={16} color="#10b981" />
                       <Text style={styles.approveText}>Approve</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity key="reject-review" style={styles.reviewActionButton}>
+                    <TouchableOpacity key={`reject-review-${review.id}`} style={styles.reviewActionButton} onPress={() => handleRejectReview(review.id)}>
                       <XCircle size={16} color="#ef4444" />
                       <Text style={styles.rejectText}>Reject</Text>
                     </TouchableOpacity>
