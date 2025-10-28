@@ -22,6 +22,10 @@ import PropertiesScreen from './src/screens/PropertiesScreen';
 import AgentsScreen from './src/screens/AgentsScreen';
 import ReviewsScreen from './src/screens/ReviewsScreen';
 
+// Import dashboard screens
+import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
+import AgentDashboardScreen from './src/screens/AgentDashboardScreen';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -136,6 +140,21 @@ function MainStack() {
       <Stack.Screen
         name="Reviews"
         component={ReviewsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminDashboard"
+        component={AdminDashboardScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AgentDashboard"
+        component={AgentDashboardScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

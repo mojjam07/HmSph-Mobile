@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { User, Settings, LogOut, Heart, Home, Phone, Mail } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { User, Settings, LogOut, Heart, Home, Phone, Mail, Shield, Building } from 'lucide-react-native';
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin, isAgent } = useAuth();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
@@ -52,6 +54,25 @@ export default function ProfileScreen() {
     },
   ];
 
+  // Add dashboard access for admin and agent roles
+  const dashboardItems = [];
+  if (isAdmin()) {
+    dashboardItems.push({
+      icon: Shield,
+      title: 'Admin Dashboard',
+      subtitle: 'Manage users, properties, and system settings',
+      onPress: () => navigation.navigate('AdminDashboard'),
+    });
+  }
+  if (isAgent()) {
+    dashboardItems.push({
+      icon: Building,
+      title: 'Agent Dashboard',
+      subtitle: 'Manage your properties and view analytics',
+      onPress: () => navigation.navigate('AgentDashboard'),
+    });
+  }
+
   if (!user) {
     return (
       <View style={styles.centerContainer}>
@@ -75,10 +96,17 @@ export default function ProfileScreen() {
             {user.firstName} {user.lastName}
           </Text>
           <Text style={styles.userEmail}>{user.email}</Text>
-          <Text style={styles.userRole}>
-            {user.role === 'admin' ? 'Administrator' :
-             user.role === 'agent' ? 'Real Estate Agent' : 'User'}
-          </Text>
+          <View style={styles.roleContainer}>
+            <Text style={[
+              styles.userRole,
+              user.role === 'ADMIN' && styles.adminRole,
+              user.role === 'AGENT' && styles.agentRole,
+              user.role === 'USER' && styles.userRoleDefault
+            ]}>
+              {user.role === 'ADMIN' ? '🏢 Administrator' :
+               user.role === 'AGENT' ? '🏠 Real Estate Agent' : '👤 User'}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -115,6 +143,28 @@ export default function ProfileScreen() {
           </View>
         </View>
       </View>
+
+      {/* Dashboard Access */}
+      {dashboardItems.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Dashboard Access</Text>
+          {dashboardItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.menuItem, styles.dashboardItem]}
+              onPress={item.onPress}
+            >
+              <View style={styles.menuItemLeft}>
+                <item.icon size={24} color="#007bff" />
+                <View style={styles.menuItemText}>
+                  <Text style={styles.menuItemTitle}>{item.title}</Text>
+                  <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* Menu Items */}
       <View style={styles.section}>
@@ -222,6 +272,21 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontWeight: '500',
   },
+  roleContainer: {
+    marginTop: 4,
+  },
+  adminRole: {
+    color: '#dc3545',
+    fontWeight: '600',
+  },
+  agentRole: {
+    color: '#28a745',
+    fontWeight: '600',
+  },
+  userRoleDefault: {
+    color: '#007bff',
+    fontWeight: '500',
+  },
   section: {
     backgroundColor: '#fff',
     marginBottom: 20,
@@ -315,5 +380,10 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     color: '#999',
+  },
+  dashboardItem: {
+    backgroundColor: '#f0f8ff',
+    borderLeftWidth: 4,
+    borderLeftColor: '#007bff',
   },
 });

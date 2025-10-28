@@ -98,6 +98,14 @@ export const AuthProvider = ({ children }) => {
     AsyncStorage.setItem('user', JSON.stringify(userData));
   };
 
+  const isAdmin = () => {
+    return user?.role === 'ADMIN';
+  };
+
+  const isAgent = () => {
+    return user?.role === 'AGENT';
+  };
+
   const value = {
     user,
     loading,
@@ -106,6 +114,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    isAdmin,
+    isAgent,
   };
 
   return (

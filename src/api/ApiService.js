@@ -245,10 +245,47 @@ class ApiService {
     }
   }
 
+  async getAgentProperties(agentId) {
+    try {
+      const response = await this.client.get(`/api/agents/${agentId}/properties`);
+      return response.data.properties || response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async getAgentProfile() {
+    try {
+      const response = await this.client.get('/api/agents/profile');
+      return response.data.agent || response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
   // Contact API
   async submitContact(contactData) {
     try {
       const response = await this.client.post('/api/contact', contactData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  // Admin API methods
+  async getAdminDashboardStats() {
+    try {
+      const response = await this.client.get('/api/admin/dashboard/stats');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }
+
+  async getAdminAgents(params = {}) {
+    try {
+      const response = await this.client.get('/api/admin/agents', { params });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
