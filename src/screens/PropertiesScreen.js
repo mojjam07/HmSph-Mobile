@@ -173,7 +173,7 @@ export default function PropertiesScreen() {
   if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#0000ff" />
         <Text style={styles.loadingText}>Loading properties...</Text>
       </View>
     );
@@ -295,18 +295,18 @@ export default function PropertiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ffffff',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ffffff',
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
+    color: '#666666',
   },
   header: {
     flexDirection: 'row',
@@ -314,9 +314,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     paddingTop: 50,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#cccccc',
   },
   backButton: {
     padding: 8,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#000000',
   },
   heroSection: {
     backgroundColor: '#007bff',
@@ -334,17 +334,17 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
     textAlign: 'center',
     marginBottom: 8,
   },
   heroSubtitle: {
     fontSize: 16,
-    color: '#e6f3ff',
+    color: '#e6f2ff',
     textAlign: 'center',
   },
   searchSection: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     padding: 16,
   },
   searchContainer: {
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f8f9fa',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1f2937',
+    color: '#000000',
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f8f9fa',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
@@ -381,17 +381,17 @@ const styles = StyleSheet.create({
   filterButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#6b7280',
+    color: '#666666',
   },
   filtersContainer: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f8f9fa',
     borderRadius: 12,
     padding: 16,
   },
   filtersTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#000000',
     marginBottom: 12,
     marginTop: 8,
   },
@@ -399,13 +399,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   filterOption: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#cccccc',
   },
   filterOptionSelected: {
     backgroundColor: '#007bff',
@@ -413,10 +413,10 @@ const styles = StyleSheet.create({
   },
   filterOptionText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#666666',
   },
   filterOptionTextSelected: {
-    color: '#fff',
+    color: '#ffffff',
   },
   clearFiltersButton: {
     alignSelf: 'flex-start',
@@ -433,14 +433,14 @@ const styles = StyleSheet.create({
   },
   resultsHeader: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#cccccc',
   },
   resultsCount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#000000',
   },
   errorContainer: {
     flex: 1,
@@ -451,26 +451,26 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#000000',
     marginTop: 16,
     marginBottom: 8,
   },
   errorMessage: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
   },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ef4444',
+    backgroundColor: '#dc3545',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
@@ -487,13 +487,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#000000',
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
   },

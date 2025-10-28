@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
   },
   title: {
     fontSize: 24,
@@ -135,14 +135,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
     marginTop: 50,
+    color: '#000000',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#cccccc',
     padding: 15,
     marginBottom: 15,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
+    color: '#000000',
   },
   button: {
     backgroundColor: '#28a745',
@@ -152,10 +154,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#6c757d',
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },

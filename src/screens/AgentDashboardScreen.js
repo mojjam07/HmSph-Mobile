@@ -132,51 +132,7 @@ const AgentDashboardScreen = () => {
     </View>
   );
 
-  const renderPropertyCard = (property) => (
-    <TouchableOpacity
-      key={property.id}
-      style={styles.propertyCard}
-      onPress={() => navigation.navigate('PropertyDetails', { propertyId: property.id })}
-    >
-      <View style={styles.propertyHeader}>
-        <Text style={styles.propertyTitle} numberOfLines={1}>
-          {property.title}
-        </Text>
-        <View style={[styles.statusBadge,
-          property.status === 'ACTIVE' ? styles.activeBadge :
-          property.status === 'PENDING' ? styles.pendingBadge :
-          styles.soldBadge
-        ]}>
-          <Text style={styles.statusText}>{property.status}</Text>
-        </View>
-      </View>
 
-      <Text style={styles.propertyPrice}>
-        ₦{property.price?.toLocaleString() || 'N/A'}
-      </Text>
-
-      <View style={styles.propertyDetails}>
-        <Text style={styles.propertyDetail}>
-          {property.bedrooms || 0} bed • {property.bathrooms || 0} bath
-        </Text>
-        <Text style={styles.propertyLocation}>
-          {property.city}, {property.state}
-        </Text>
-      </View>
-
-      <View style={styles.propertyActions}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Edit3 size={16} color="#6b7280" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Eye size={16} color="#6b7280" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <MessageSquare size={16} color="#6b7280" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
 
   if (loading) {
     return (
@@ -244,6 +200,7 @@ const AgentDashboardScreen = () => {
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsGrid}>
           <TouchableOpacity
+            key="add-property"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Properties', { showAgentForm: true })}
           >
@@ -252,6 +209,7 @@ const AgentDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="view-listings"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Properties')}
           >
@@ -260,6 +218,7 @@ const AgentDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="view-reviews"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Reviews')}
           >
@@ -268,6 +227,7 @@ const AgentDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="profile"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Profile')}
           >
@@ -278,7 +238,7 @@ const AgentDashboardScreen = () => {
       </View>
 
       {/* Recent Properties */}
-      <View style={styles.propertiesSection}>
+      <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Your Properties</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Properties')}>
@@ -287,9 +247,48 @@ const AgentDashboardScreen = () => {
         </View>
 
         {dashboardData.properties.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.propertiesScroll}>
-            {dashboardData.properties.slice(0, 3).map(renderPropertyCard)}
-          </ScrollView>
+          dashboardData.properties.slice(0, 3).map((property) => (
+            <View key={property.id} style={styles.itemCard}>
+              <View style={styles.itemHeader}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemTitle} numberOfLines={1}>
+                    {property.title}
+                  </Text>
+                  <Text style={styles.itemSubtitle}>
+                    {property.city}, {property.state}
+                  </Text>
+                </View>
+                <View style={[styles.statusBadge,
+                  property.status === 'ACTIVE' ? styles.activeBadge :
+                  property.status === 'PENDING' ? styles.pendingBadge :
+                  styles.soldBadge
+                ]}>
+                  <Text style={styles.statusText}>{property.status}</Text>
+                </View>
+              </View>
+
+              <View style={styles.itemDetails}>
+                <Text style={styles.itemDetail}>
+                  ₦{property.price?.toLocaleString() || 'N/A'}
+                </Text>
+                <Text style={styles.itemDetail}>
+                  {property.bedrooms} bed • {property.bathrooms} bath
+                </Text>
+              </View>
+
+              <View style={styles.itemActions}>
+                <TouchableOpacity key="edit-property" style={styles.actionButton}>
+                  <Edit3 size={16} color="#6b7280" />
+                </TouchableOpacity>
+                <TouchableOpacity key="view-property" style={styles.actionButton}>
+                  <Eye size={16} color="#6b7280" />
+                </TouchableOpacity>
+                <TouchableOpacity key="message-property" style={styles.actionButton}>
+                  <MessageSquare size={16} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
         ) : (
           <View style={styles.emptyState}>
             <Building size={48} color="#9ca3af" />
@@ -308,7 +307,7 @@ const AgentDashboardScreen = () => {
       </View>
 
       {/* Recent Reviews */}
-      <View style={styles.reviewsSection}>
+      <View style={[styles.section, { paddingBottom: 40 }]}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Reviews</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Reviews')}>
@@ -327,7 +326,7 @@ const AgentDashboardScreen = () => {
                   <View style={styles.reviewRating}>
                     {[...Array(5)].map((_, i) => (
                       <Star
-                        key={i}
+                        key={`star-${i}`}
                         size={14}
                         color={i < review.rating ? '#f59e0b' : '#d1d5db'}
                         fill={i < review.rating ? '#f59e0b' : 'transparent'}
@@ -458,10 +457,10 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     flex: 1,
-    minWidth: (width - 40 - 24) / 2,
+    minWidth: (width - 40 - 36) / 3,
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -471,12 +470,12 @@ const styles = StyleSheet.create({
   },
   actionText: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#1f2937',
     textAlign: 'center',
   },
-  propertiesSection: {
+  section: {
     padding: 20,
   },
   sectionHeader: {
@@ -490,34 +489,35 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontWeight: '600',
   },
-  propertiesScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-  },
-  propertyCard: {
-    width: 280,
+  itemCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    marginRight: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  propertyHeader: {
+  itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 8,
   },
-  propertyTitle: {
+  itemInfo: {
+    flex: 1,
+  },
+  itemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1f2937',
-    flex: 1,
-    marginRight: 8,
+    marginBottom: 4,
+  },
+  itemSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -538,30 +538,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1f2937',
   },
-  propertyPrice: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#007bff',
-    marginBottom: 8,
-  },
-  propertyDetails: {
+  itemDetails: {
     marginBottom: 12,
   },
-  propertyDetail: {
+  itemDetail: {
     fontSize: 14,
     color: '#6b7280',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  propertyLocation: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  propertyActions: {
+  itemActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    justifyContent: 'flex-end',
+    gap: 8,
   },
   actionButton: {
     padding: 8,
@@ -595,10 +583,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
-  },
-  reviewsSection: {
-    padding: 20,
-    paddingBottom: 40,
   },
   reviewCard: {
     backgroundColor: '#fff',
@@ -637,6 +621,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
     lineHeight: 20,
+    marginBottom: 12,
   },
 });
 

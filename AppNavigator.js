@@ -31,7 +31,7 @@ const Tab = createBottomTabNavigator();
 
 function LoadingScreen() {
   return (
-    <View style={styles.loadingContainer}>
+    <View style={[styles.loadingContainer, { backgroundColor: '#ffffff' }]}>
       <ActivityIndicator size="large" color="#007bff" />
     </View>
   );
@@ -77,8 +77,10 @@ function MainTabs() {
           return iconComponent;
         },
         tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#666',
+        tabBarInactiveTintColor: '#666666',
         headerShown: false,
+        tabBarStyle: { backgroundColor: '#ffffff', borderTopColor: '#cccccc' },
+        tabBarLabelStyle: { color: '#000000' },
       })}
     >
       <Tab.Screen
@@ -180,6 +182,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
 });

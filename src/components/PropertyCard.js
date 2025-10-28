@@ -1,14 +1,127 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Heart, MapPin, Bed, Bath, Square } from 'lucide-react-native';
 
 const PropertyCard = ({ property, isFavorite, onToggleFavorite, onPress }) => {
+
   const formatPrice = (amount) => {
     if (amount >= 1000000) {
       return `₦${(amount / 1000000).toFixed(1)}M`;
     }
     return `₦${amount.toLocaleString()}`;
   };
+
+  const styles = StyleSheet.create({
+    card: {
+      backgroundColor: '#ffffff',
+      borderRadius: 12,
+      marginBottom: 16,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    imageContainer: {
+      position: 'relative',
+      height: 200,
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+    },
+    favoriteButton: {
+      position: 'absolute',
+      top: 12,
+      right: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderRadius: 20,
+      padding: 8,
+    },
+    favoriteButtonActive: {
+      backgroundColor: '#dc3545',
+    },
+    priceBadge: {
+      position: 'absolute',
+      bottom: 12,
+      left: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+    },
+    priceText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    content: {
+      padding: 16,
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#000000',
+      marginBottom: 8,
+    },
+    location: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    locationText: {
+      fontSize: 14,
+      color: '#666666',
+      marginLeft: 4,
+    },
+    description: {
+      fontSize: 14,
+      color: '#666666',
+      marginBottom: 12,
+      lineHeight: 20,
+    },
+    features: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    feature: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    featureText: {
+      fontSize: 12,
+      color: '#666666',
+      marginLeft: 4,
+    },
+    agent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: '#cccccc',
+    },
+    agentAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      marginRight: 12,
+    },
+    agentInfo: {
+      flex: 1,
+    },
+    agentName: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#000000',
+    },
+    agentRating: {
+      fontSize: 12,
+      color: '#666666',
+    },
+  });
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -91,116 +204,6 @@ const PropertyCard = ({ property, isFavorite, onToggleFavorite, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  imageContainer: {
-    position: 'relative',
-    height: 200,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  favoriteButtonActive: {
-    backgroundColor: '#ef4444',
-  },
-  priceBadge: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  priceText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 8,
-  },
-  location: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  locationText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 4,
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-    lineHeight: 20,
-  },
-  features: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  feature: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featureText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 4,
-  },
-  agent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  agentAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginRight: 12,
-  },
-  agentInfo: {
-    flex: 1,
-  },
-  agentName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  agentRating: {
-    fontSize: 12,
-    color: '#666',
-  },
-});
+
 
 export default PropertyCard;

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, ScrollView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { Info, Phone, Building, Users, Star, ArrowRight } from 'lucide-react-native';
+import { Info, Phone, Building, Users, Star, ArrowRight, Heart } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import ApiService from '../api/ApiService';
 import PropertyCard from '../components/PropertyCard';
 
@@ -11,7 +13,7 @@ export default function HomeScreen() {
   const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -66,6 +68,15 @@ export default function HomeScreen() {
     }
     setFavorites(newFavorites);
 
+    // iOS haptic feedback
+    if (Platform.OS === 'ios') {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (error) {
+        console.error('Haptic feedback failed:', error);
+      }
+    }
+
     try {
       if (wasFavorite) {
         await ApiService.removeFromFavorites(propertyId);
@@ -92,20 +103,24 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Welcome to HomeSphere</Text>
-        <Text style={styles.welcomeText}>Hello, {user?.firstName || 'User'}!</Text>
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Welcome to HomeSphere</Text>
+              <Text style={styles.welcomeText}>
+                Hello, {user?.firstName || 'User'}!
+              </Text>
+            </View>
+          </View>
+        </View>
 
       {/* Quick Access Menu */}
       <View style={styles.quickAccessSection}>
@@ -124,27 +139,27 @@ export default function HomeScreen() {
             style={styles.quickAccessCard}
             onPress={() => navigation.navigate('Agents')}
           >
-            <Users size={24} color="#10b981" />
+            <Users size={24} color="#007bff" />
             <Text style={styles.quickAccessText}>Find Agents</Text>
-            <ArrowRight size={16} color="#10b981" />
+            <ArrowRight size={16} color="#007bff" />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.quickAccessCard}
             onPress={() => navigation.navigate('Reviews')}
           >
-            <Star size={24} color="#f59e0b" />
+            <Star size={24} color="#007bff" />
             <Text style={styles.quickAccessText}>Read Reviews</Text>
-            <ArrowRight size={16} color="#f59e0b" />
+            <ArrowRight size={16} color="#007bff" />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.quickAccessCard}
             onPress={() => navigation.navigate('Contact')}
           >
-            <Phone size={24} color="#8b5cf6" />
+            <Phone size={24} color="#007bff" />
             <Text style={styles.quickAccessText}>Contact Us</Text>
-            <ArrowRight size={16} color="#8b5cf6" />
+            <ArrowRight size={16} color="#007bff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -189,14 +204,14 @@ export default function HomeScreen() {
           <Text style={styles.noPropertiesText}>No properties available</Text>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centerContainer: {
     flex: 1,
@@ -207,6 +222,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 10,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  titleContainer: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -214,21 +237,9 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
     marginBottom: 10,
   },
-  logoutButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#dc3545',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 5,
-  },
-  logoutText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
+
   quickAccessSection: {
     paddingHorizontal: 20,
     marginBottom: 20,
@@ -236,7 +247,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 15,
   },
   quickAccessGrid: {
@@ -245,14 +255,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   quickAccessCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     width: '48%',
     marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#888',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -262,7 +271,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginLeft: 12,
   },
   aboutSection: {
@@ -270,10 +278,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   aboutCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: '#888',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -290,18 +297,15 @@ const styles = StyleSheet.create({
   aboutTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   aboutSubtitle: {
     fontSize: 14,
-    color: '#666',
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
     paddingHorizontal: 20,
   },
   listContainer: {
@@ -310,7 +314,6 @@ const styles = StyleSheet.create({
   },
   noPropertiesText: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
   },
 });

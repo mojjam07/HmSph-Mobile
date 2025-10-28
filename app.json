@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile-app",
-    "slug": "mobile-app",
+    "name": "HomeSphere",
+    "slug": "homesphere-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,13 +12,22 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.homesphere.mobile",
+      "buildNumber": "1.0.0",
+      "requireFullScreen": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs camera access to upload property images",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select property images",
+        "NSLocationWhenInUseUsageDescription": "This app needs location access to show nearby properties"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.homesphere.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"

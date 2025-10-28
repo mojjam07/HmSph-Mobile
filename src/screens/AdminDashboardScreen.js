@@ -216,6 +216,7 @@ const AdminDashboardScreen = () => {
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsGrid}>
           <TouchableOpacity
+            key="manage-agents"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Agents')}
           >
@@ -224,6 +225,7 @@ const AdminDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="review-properties"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Properties')}
           >
@@ -232,6 +234,7 @@ const AdminDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="moderate-reviews"
             style={styles.actionCard}
             onPress={() => navigation.navigate('Reviews')}
           >
@@ -240,6 +243,7 @@ const AdminDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="view-analytics"
             style={styles.actionCard}
             onPress={() => Alert.alert('Coming Soon', 'Analytics dashboard coming soon')}
           >
@@ -248,6 +252,7 @@ const AdminDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="generate-reports"
             style={styles.actionCard}
             onPress={() => Alert.alert('Coming Soon', 'Reports dashboard coming soon')}
           >
@@ -256,6 +261,7 @@ const AdminDashboardScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="system-settings"
             style={styles.actionCard}
             onPress={() => Alert.alert('Coming Soon', 'Settings panel coming soon')}
           >
@@ -305,15 +311,15 @@ const AdminDashboardScreen = () => {
               </View>
 
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity key="view-agent" style={styles.actionButton}>
                   <Eye size={16} color="#6b7280" />
                 </TouchableOpacity>
                 {agent.verificationStatus === 'PENDING' && (
                   <>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity key="approve-agent" style={styles.actionButton}>
                       <CheckCircle size={16} color="#10b981" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity key="reject-agent" style={styles.actionButton}>
                       <XCircle size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </>
@@ -372,15 +378,15 @@ const AdminDashboardScreen = () => {
               </View>
 
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity key="view-property" style={styles.actionButton}>
                   <Eye size={16} color="#6b7280" />
                 </TouchableOpacity>
                 {property.status === 'PENDING' && (
                   <>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity key="approve-property" style={styles.actionButton}>
                       <CheckCircle size={16} color="#10b981" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity key="reject-property" style={styles.actionButton}>
                       <XCircle size={16} color="#ef4444" />
                     </TouchableOpacity>
                   </>
@@ -441,11 +447,11 @@ const AdminDashboardScreen = () => {
               <View style={styles.reviewActions}>
                 {review.status === 'PENDING' && (
                   <>
-                    <TouchableOpacity style={styles.reviewActionButton}>
+                    <TouchableOpacity key="approve-review" style={styles.reviewActionButton}>
                       <CheckCircle size={16} color="#10b981" />
                       <Text style={styles.approveText}>Approve</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.reviewActionButton}>
+                    <TouchableOpacity key="reject-review" style={styles.reviewActionButton}>
                       <XCircle size={16} color="#ef4444" />
                       <Text style={styles.rejectText}>Reject</Text>
                     </TouchableOpacity>
